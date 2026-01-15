@@ -25,14 +25,14 @@ def decode(filename):
     results_bb = []
     results_kp = []
     for i in range(len(bb)):
-        if len(bb[i][1]) == 0 or len(kp[i][1]) == 0:
+        if len(bb[i][0]) == 0 or len(kp[i][0]) == 0:
             # No bbox/keypoints detected for this frame -> will be interpolated
             results_bb.append(np.full(4, np.nan, dtype=np.float32)) # 4 bounding box coordinates
             results_kp.append(np.full((17, 4), np.nan, dtype=np.float32)) # 17 COCO keypoints
             continue
-        best_match = np.argmax(bb[i][1][:, 4])
-        best_bb = bb[i][1][best_match, :4]
-        best_kp = kp[i][1][best_match].T.copy()
+        best_match = np.argmax(bb[i][0][:, 4])
+        best_bb = bb[i][0][best_match, :4]
+        best_kp = kp[i][0][best_match].T.copy()
         results_bb.append(best_bb)
         results_kp.append(best_kp)
         

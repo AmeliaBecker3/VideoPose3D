@@ -104,6 +104,7 @@ def main(args):
         segments = []
         keypoints = []
 
+        num_skipped = 0
         for frame_i, im in enumerate(read_video(video_name)):
             t = time.time()
             outputs = predictor(im)['instances'].to('cpu')
@@ -117,25 +118,32 @@ def main(args):
                     has_bbox = True
                     scores = outputs.scores.numpy()[:, None]
                     bbox_tensor = np.concatenate((bbox_tensor, scores), axis=1)
+
             if has_bbox:
                 kps = outputs.pred_keypoints.numpy()
-                kps_xy = kps[:, :, :2]
-                kps_prob = kps[:, :, 2:3]
+                kps_xy = kps[:1, :, :2]
+                kps_prob = kps[:1, :, 2:3]
                 kps_logit = np.zeros_like(kps_prob) # Dummy
                 kps = np.concatenate((kps_xy, kps_logit, kps_prob), axis=2)
                 kps = kps.transpose(0, 2, 1)
+
+                # Mimic Detectron1 format
+                print("Adding bboxes: ", bbox_tensor.shape)
+                cls_boxes = [bbox_tensor[:1,:]]
+                cls_keyps = [kps]
             else:
-                kps = []
-                bbox_tensor = []
-                
-            # Mimic Detectron1 format
-            cls_boxes = [[], bbox_tensor]
-            cls_keyps = [[], kps]
+                # ASN: Think about how we should handle missing frames!
+                num_skipped = num_skipped + 1
+                continue
+                cls_boxes = []
+                cls_keyps = []
             
             boxes.append(cls_boxes)
             segments.append(None)
             keypoints.append(cls_keyps)
-
+            #print("Adding keypoints (after): ", kps.shape)
+            #print("Keypoints XY: ", kps_xy.shape)
+            #print("Keypoints prob: ", kps_prob.shape)
         
         # Video resolution
         metadata = {
@@ -143,7 +151,15 @@ def main(args):
             'h': im.shape[0],
         }
         
-        np.savez_compressed(out_name, boxes=boxes, segments=segments, keypoints=keypoints, metadata=metadata)
+        print(f"WARNING: Skipped {num_skipped} frames")
+        print("saving to ", out_name)
+        np.savez_compressed(out_name, boxes=boxes, segments=segments, keypoints=keypoints, metadata=metadata, allow_pickle=True)
+        #np.savez_compressed(out_name, keypoints=keypoints)
+        test = np.load(out_name + ".npz", allow_pickle=True)
+        print("Num keys: ", len(test["keypoints"]))
+        print("Num boxes: ", len(test["boxes"]))
+        print("Metadata: ", test["metadata"]) 
+
 
 
 if __name__ == '__main__':
