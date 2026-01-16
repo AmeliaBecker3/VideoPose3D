@@ -70,7 +70,8 @@ def read_video(filename):
             '-f', 'image2pipe',
             '-pix_fmt', 'bgr24',
             '-vsync', '0',
-            '-vcodec', 'rawvideo', '-']
+            '-vcodec', 'rawvideo',
+            '-framerate', '29.97', '-']
 
     pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=-1)
     while True:

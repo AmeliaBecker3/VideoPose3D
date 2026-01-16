@@ -1,5 +1,4 @@
 #! /bin/bash
-# Run this file in the parent directory
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 input_video.mp4"

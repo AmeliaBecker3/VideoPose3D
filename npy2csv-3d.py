@@ -17,7 +17,7 @@ for f in range(len(data)):
       x = pos[0]
       y = pos[1]
       z = pos[2]
-      data[f][p][0] = x
+      data[f][p][0] = -x
       data[f][p][1] = z
       data[f][p][2] = -y
       
