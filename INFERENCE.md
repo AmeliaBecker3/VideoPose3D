@@ -22,6 +22,11 @@ ffmpeg -i input.mp4 -ss 24 -t 10 -c copy output.mp4
 ```
 extracts a clip from minute 1:00 to minute 1:30 of `input.mp4`, and exports it to `output.mp4`.
 
+To test your clip
+```
+ffprobe -v error -select_streams v:0 -count_frames -show_entries stream=nb_read_frames output.mp4
+```
+
 Optionally, you can also adapt the frame rate of the video. Most videos have a frame rate of about 25 FPS, but our Human3.6M model was trained on 50-FPS videos. Since our model is robust to alterations in speed, this step is not very important and can be skipped, but if you want the best possible results you can use ffmpeg again for this task:
 ```
 ffmpeg -i input.mp4 -filter "minterpolate='fps=50'" -crf 0 output.mp4
