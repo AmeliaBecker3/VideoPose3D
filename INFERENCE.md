@@ -18,7 +18,7 @@ Download the [pretrained model](https://dl.fbaipublicfiles.com/video-pose-3d/pre
 ## Step 2 (optional): video preprocessing
 Since the script expects a single-person scenario, you may want to extract a portion of your video. This is very easy to do with ffmpeg, e.g.
 ```
-ffmpeg -i input.mp4 -ss 1:00 -to 1:30 -c copy output.mp4
+ffmpeg -i input.mp4 -ss 24 -t 10 -c copy output.mp4
 ```
 extracts a clip from minute 1:00 to minute 1:30 of `input.mp4`, and exports it to `output.mp4`.
 
