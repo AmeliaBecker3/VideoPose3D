@@ -67,11 +67,12 @@ def read_video(filename):
 
     command = ['ffmpeg',
             '-i', filename,
+            '-framerate', '30', 
             '-f', 'image2pipe',
             '-pix_fmt', 'bgr24',
             '-vsync', '0',
             '-vcodec', 'rawvideo',
-            '-framerate', '29.97', '-']
+            '-']
 
     pipe = sp.Popen(command, stdout=sp.PIPE, bufsize=-1)
     while True:
@@ -87,8 +88,8 @@ def main(args):
     cfg.merge_from_file(model_zoo.get_config_file(args.cfg))
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url(args.cfg)
+    cfg.MODEL.DEVICE = "cuda"
     predictor = DefaultPredictor(cfg)
-    
 
     if os.path.isdir(args.im_or_folder):
         im_list = glob.iglob(args.im_or_folder + '/*.' + args.image_ext)
@@ -110,7 +111,7 @@ def main(args):
             t = time.time()
             outputs = predictor(im)['instances'].to('cpu')
             
-            print('Frame {} processed in {:.3f}s'.format(frame_i, time.time() - t))
+            #print('Frame {} processed in {:.3f}s'.format(frame_i, time.time() - t))
 
             has_bbox = False
             if outputs.has('pred_boxes'):
@@ -129,7 +130,7 @@ def main(args):
                 kps = kps.transpose(0, 2, 1)
 
                 # Mimic Detectron1 format
-                print("Adding bboxes: ", bbox_tensor.shape)
+                #print("Adding bboxes: ", bbox_tensor.shape)
                 cls_boxes = [bbox_tensor[:1,:]]
                 cls_keyps = [kps]
             else:
@@ -160,8 +161,6 @@ def main(args):
         print("Num keys: ", len(test["keypoints"]))
         print("Num boxes: ", len(test["boxes"]))
         print("Metadata: ", test["metadata"]) 
-
-
 
 if __name__ == '__main__':
     setup_logger()
